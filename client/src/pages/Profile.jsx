@@ -6,12 +6,22 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserStart, deleteUserSuccess, deleteUserFailure} from "../redux/user/userSlice";
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure,
+} from "../redux/user/userSlice";
 
 import { app } from "../firebase";
 
 export default function Profile() {
-  const {currentUser, loading, error} = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
@@ -54,47 +64,61 @@ export default function Profile() {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id] : e.target.value })
-  }
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(updateUserStart())
+      dispatch(updateUserStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method : 'POST',
-        headers : {
-          'Content-Type' : 'application/json'
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body : JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart())
+      const res = await fetch('/api/auth/signout');
       const data = await res.json();
       if(data.success === false){
-        dispatch(updateUserFailure(data.message))
+        dispatch(signOutUserFailure(data.message))
         return
       }
-
-      dispatch(updateUserSuccess(data))
-
+      dispatch(signOutUserSuccess(data))
     } catch (error) {
-      dispatch(updateUserFailure(error.message))
-    }
-  }
-
-  const handleDeleteUser = async() => {
-    try {
-      dispatch(deleteUserStart())
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-        method : 'DELETE'
-      })
-      const data = res.json();
-      if(data.success === false){
-        dispatch(deleteUserFailure(data.message))
-        return
-      }
-      dispatch(deleteUserSuccess(data))
-    } catch (error) {
-      dispatch(deleteUserFailure(error.message))
+      dispatch(signOutUserFailure(error.message))
     }
   }
 
@@ -111,7 +135,7 @@ export default function Profile() {
           }}
         />
         <img
-          src={ formData.avatar || currentUser.avatar }
+          src={formData.avatar || currentUser.avatar}
           alt="profile pic"
           className="w-24 h-24 rounded-full self-center cursor-pointer"
           onClick={() => {
@@ -158,14 +182,17 @@ export default function Profile() {
           defaultValue={currentUser.password}
         />
         <button className="bg-green-600 text-white rounded-lg p-3 uppercase">
-          {loading ? 'Loading...' : 'update'}
+          {loading ? "Loading..." : "update"}
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer font-semibold" onClick={handleDeleteUser}>
+        <span
+          className="text-red-700 cursor-pointer font-semibold"
+          onClick={handleDeleteUser}
+        >
           Delete account
         </span>
-        <span className="text-red-700 cursor-pointer font-semibold">
+        <span className="text-red-700 cursor-pointer font-semibold" onClick={handleSignOut}>
           Sign out
         </span>
       </div>
