@@ -19,6 +19,7 @@ import {
 } from "../redux/user/userSlice";
 
 import { app } from "../firebase";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -109,18 +110,18 @@ export default function Profile() {
 
   const handleSignOut = async () => {
     try {
-      dispatch(signOutUserStart())
-      const res = await fetch('/api/auth/signout');
+      dispatch(signOutUserStart());
+      const res = await fetch("/api/auth/signout");
       const data = await res.json();
-      if(data.success === false){
-        dispatch(signOutUserFailure(data.message))
-        return
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
       }
-      dispatch(signOutUserSuccess(data))
+      dispatch(signOutUserSuccess(data));
     } catch (error) {
-      dispatch(signOutUserFailure(error.message))
+      dispatch(signOutUserFailure(error.message));
     }
-  }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-3">
@@ -184,6 +185,9 @@ export default function Profile() {
         <button className="bg-green-600 text-white rounded-lg p-3 uppercase">
           {loading ? "Loading..." : "update"}
         </button>
+        <Link to='/create-listing' className="bg-slate-700 p-3 rounded-lg text-white uppercase text-center">
+          Create Listing
+        </Link>
       </form>
       <div className="flex justify-between mt-5">
         <span
@@ -192,7 +196,10 @@ export default function Profile() {
         >
           Delete account
         </span>
-        <span className="text-red-700 cursor-pointer font-semibold" onClick={handleSignOut}>
+        <span
+          className="text-red-700 cursor-pointer font-semibold"
+          onClick={handleSignOut}
+        >
           Sign out
         </span>
       </div>
