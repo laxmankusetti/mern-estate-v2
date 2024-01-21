@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import authRouter from './routes/auth.route.js';
 import userRouter from './routes/user.route.js';
 import cookieParser from 'cookie-parser';
-import listingRouter from './routes/listing.route.js';
+import listingRouter from './routes/listing.router.js';
 
 dotenv.config();
 

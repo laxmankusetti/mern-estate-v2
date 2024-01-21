@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 
 export default function Header() {
   const currentUser = useSelector((state) => state.user.currentUser);
-  console.log(currentUser)
   return (
     <header className="bg-slate-300">
       <div className="flex justify-between max-w-6xl m-auto p-3">

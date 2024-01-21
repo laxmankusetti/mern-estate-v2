@@ -182,10 +182,10 @@ export default function Profile() {
           onChange={handleChange}
           defaultValue={currentUser.password}
         />
-        <button className="bg-green-600 text-white rounded-lg p-3 uppercase">
+        <button className="bg-slate-700 text-white rounded-lg p-3 uppercase">
           {loading ? "Loading..." : "update"}
         </button>
-        <Link to='/create-listing' className="bg-slate-700 p-3 rounded-lg text-white uppercase text-center">
+        <Link to='/create-listing' className="bg-green-700 p-3 rounded-lg text-white uppercase text-center hover:opacity-90">
           Create Listing
         </Link>
       </form>
