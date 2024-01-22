@@ -26,7 +26,9 @@ export default function Profile() {
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
+  const [listShowingError, setListShowingError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [userListings, setUserListings] = useState([]);
   const fileRef = useRef(null);
   const dispatch = useDispatch();
 
@@ -124,6 +126,22 @@ export default function Profile() {
     }
   };
 
+  const handleShowListings = async () => {
+    try {
+      setListShowingError(false)
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if(data.success === false){
+        setListShowingError(true)
+        return
+      }
+      setUserListings(data)
+    } catch (error) {
+      setListShowingError(true)
+      console.log(error)
+    }
+  }
+
   return (
     <div className="max-w-lg mx-auto p-3">
       <h1 className="text-3xl text-center font-semibold my-5">Profile</h1>
@@ -205,6 +223,24 @@ export default function Profile() {
         </span>
       </div>
       <p className="text-red-600">{error}</p>
+      <button className="text-green-600 w-full font-semibold" onClick={handleShowListings}>Show Listings</button>
+      <p className="text-red-600">{listShowingError ? 'Error Showing List' : ''}</p>
+      {
+      userListings && userListings.length > 0 && 
+      <div>
+        <h1 className="text-2xl font-semibold text-center my-5">Your Listings</h1>
+        {userListings.map((listing) => (
+          <div className="flex justify-between gap-4 items-center my-4 border p-2 rounded-lg" key={listing._id}>
+            <img src={listing.imageUrls[0]} alt={listing.imageUrls[0]} className="w-20 h-20"/>
+            <p className="hover:underline truncate flex-1">{listing.name}</p>
+            <div className="flex flex-col items-center">
+              <span className="uppercase text-red-700 font-semibold cursor-pointer">Delete</span>
+              <span className="uppercase text-green-700 font-semibold cursor-pointer">edit</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      }
     </div>
   );
 }
