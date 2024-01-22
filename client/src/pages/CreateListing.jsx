@@ -151,7 +151,6 @@ export default function CreateListing() {
       setLoading(false);
     }
   };
-
   return (
     <main className="max-w-4xl mx-auto p-3">
       <h1 className="text-3xl font-semibold text-center my-7">

@@ -57,7 +57,7 @@ export default function Profile() {
       },
       (error) => {
         setFileUploadError(true);
-        console.log(error)
+        console.log(error);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
@@ -128,16 +128,32 @@ export default function Profile() {
 
   const handleShowListings = async () => {
     try {
-      setListShowingError(false)
+      setListShowingError(false);
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
       const data = await res.json();
+      if (data.success === false) {
+        setListShowingError(true);
+        return;
+      }
+      setUserListings(data);
+    } catch (error) {
+      setListShowingError(true);
+      console.log(error);
+    }
+  };
+
+  const handleListingDelete = async (listingId) => {
+    try {
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method : 'DELETE'
+      })
+      const data = res.json();
       if(data.success === false){
-        setListShowingError(true)
+        console.log(data.message)
         return
       }
-      setUserListings(data)
+      setUserListings(prevState => prevState.filter((listing) => listing._id !== listingId))
     } catch (error) {
-      setListShowingError(true)
       console.log(error)
     }
   }
@@ -204,7 +220,10 @@ export default function Profile() {
         <button className="bg-slate-700 text-white rounded-lg p-3 uppercase">
           {loading ? "Loading..." : "update"}
         </button>
-        <Link to='/create-listing' className="bg-green-700 p-3 rounded-lg text-white uppercase text-center hover:opacity-90">
+        <Link
+          to="/create-listing"
+          className="bg-green-700 p-3 rounded-lg text-white uppercase text-center hover:opacity-90"
+        >
           Create Listing
         </Link>
       </form>
@@ -223,24 +242,49 @@ export default function Profile() {
         </span>
       </div>
       <p className="text-red-600">{error}</p>
-      <button className="text-green-600 w-full font-semibold" onClick={handleShowListings}>Show Listings</button>
-      <p className="text-red-600">{listShowingError ? 'Error Showing List' : ''}</p>
-      {
-      userListings && userListings.length > 0 && 
-      <div>
-        <h1 className="text-2xl font-semibold text-center my-5">Your Listings</h1>
-        {userListings.map((listing) => (
-          <div className="flex justify-between gap-4 items-center my-4 border p-2 rounded-lg" key={listing._id}>
-            <img src={listing.imageUrls[0]} alt={listing.imageUrls[0]} className="w-20 h-20"/>
-            <p className="hover:underline truncate flex-1">{listing.name}</p>
-            <div className="flex flex-col items-center">
-              <span className="uppercase text-red-700 font-semibold cursor-pointer">Delete</span>
-              <span className="uppercase text-green-700 font-semibold cursor-pointer">edit</span>
+      <button
+        className="text-green-600 w-full font-semibold"
+        onClick={handleShowListings}
+      >
+        Show Listings
+      </button>
+      <p className="text-red-600">
+        {listShowingError ? "Error Showing List" : ""}
+      </p>
+      {userListings && userListings.length > 0 && (
+        <div>
+          <h1 className="text-2xl font-semibold text-center my-5">
+            Your Listings
+          </h1>
+          {userListings.map((listing) => (
+            <div
+              className="flex justify-between gap-4 items-center my-4 border p-2 rounded-lg"
+              key={listing._id}
+            >
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls[0]}
+                  alt={listing.imageUrls[0]}
+                  className="w-20 h-20"
+                />
+              </Link>
+              <Link to={`/listing/${listing._id}`}>
+                <p className="hover:underline truncate flex-1">
+                  {listing.name}
+                </p>
+              </Link>
+              <div className="flex flex-col items-center">
+                <span className="uppercase text-red-700 font-semibold cursor-pointer" onClick={() => {handleListingDelete(listing._id)}}>
+                  Delete
+                </span>
+                <span className="uppercase text-green-700 font-semibold cursor-pointer">
+                  edit
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      }
+          ))}
+        </div>
+      )}
     </div>
   );
 }
